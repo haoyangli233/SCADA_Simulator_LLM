@@ -1,0 +1,258 @@
+app:
+  description: ''
+  icon: eye
+  icon_background: '#FFEAD5'
+  mode: advanced-chat
+  name: 'Reasoning for SCADA '
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai_api_compatible:0.0.24@2266d6adfeafd3a161ba4a033553f4ff8a8b1d07be54f4b11ce9e68032889ac3
+    version: null
+kind: app
+version: 0.4.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        sourceType: llm
+        targetType: answer
+      id: llm-answer
+      source: llm
+      sourceHandle: source
+      target: answer
+      targetHandle: target
+      type: custom
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: knowledge-retrieval
+      id: 1763409359462-source-1763914009084-target
+      source: '1763409359462'
+      sourceHandle: source
+      target: '1763914009084'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: knowledge-retrieval
+        targetType: llm
+      id: 1763914009084-source-llm-target
+      source: '1763914009084'
+      sourceHandle: source
+      target: llm
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: Start
+        type: start
+        variables: []
+      height: 52
+      id: '1763409359462'
+      position:
+        x: -160
+        y: 291
+      positionAbsolute:
+        x: -160
+        y: 291
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1763914009084'
+          - result
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: qwen3-4b
+          provider: langgenius/openai_api_compatible/openai_api_compatible
+        prompt_template:
+        - id: 63fab8c8-87a8-414f-99cb-ff2dcf26a92c
+          role: system
+          text: 'You are a SCADA assistant that explains FAULT states for sensors
+            in a power/industrial system.
+
+
+            Each request comes only after another LLM has already decided that the
+            device status is FAULT.
+
+
+            You will receive:
+
+            - device_name
+
+            - device_type (dummy, wind_speed, wind_dir, inside_temp, outside_temp)
+
+            - normal (baseline value or null)
+
+            - current_value (a number or "NA")
+
+            - recent_values_last_5s (oldest -> newest), a short list of readings
+
+
+            Optionally, you may also see retrieved domain knowledge about this device
+            type inside a <knowledge> block:
+
+            <knowledge>
+
+            {{#context#}}
+
+            </knowledge>
+
+
+            Your task:
+
+            - Produce ONE short, concrete comment to help the operator understand
+            the likely issue.
+
+            - Focus on patterns: out-of-range values, unstable behaviour, many NAs,
+            sudden jumps, hacking-like oscillations, etc.
+
+            - Tailor the wording to the device_type (e.g., wind speed vs. temperature
+            vs. dummy sensor).
+
+
+            Style constraints:
+
+            - Maximum 20 words.
+
+            - Single sentence.
+
+            - No labels, no severity words like “GOOD/ATTENTION/FAULT” (these are
+            already decided elsewhere).
+
+            - Do NOT mention “model”, “LLM”, “prompt”, or “knowledge base”.
+
+
+            Your output must be ONLY the comment sentence, nothing else.
+
+            '
+        - id: c79f2b4d-3471-4811-8919-383478a1c50c
+          role: user
+          text: '{{#sys.query#}}'
+        selected: true
+        title: LLM
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: llm
+      position:
+        x: 414
+        y: 291
+      positionAbsolute:
+        x: 414
+        y: 291
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#llm.text#}}'
+        selected: false
+        title: Answer
+        type: answer
+        variables: []
+      height: 104
+      id: answer
+      position:
+        x: 706
+        y: 291
+      positionAbsolute:
+        x: 706
+        y: 291
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        dataset_ids:
+        - QqmBxtXSay0BYfqvrUqbhHZlGz4l2mg3GJ8Lw6v7gJHIXhlGbxlOLLv9tqoOXO9x
+        multiple_retrieval_config:
+          reranking_enable: false
+          reranking_mode: reranking_model
+          top_k: 4
+        query_variable_selector:
+        - sys
+        - query
+        retrieval_mode: multiple
+        selected: false
+        title: Knowledge Retrieval
+        type: knowledge-retrieval
+      height: 90
+      id: '1763914009084'
+      position:
+        x: 136
+        y: 291
+      positionAbsolute:
+        x: 136
+        y: 291
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: 215
+      y: 31.5
+      zoom: 1
+  rag_pipeline_variables: []

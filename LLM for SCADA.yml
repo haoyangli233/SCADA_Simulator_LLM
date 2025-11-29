@@ -1,0 +1,247 @@
+app:
+  description: ''
+  icon: eye
+  icon_background: '#FFEAD5'
+  mode: advanced-chat
+  name: LLM for SCADA
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai_api_compatible:0.0.24@2266d6adfeafd3a161ba4a033553f4ff8a8b1d07be54f4b11ce9e68032889ac3
+    version: null
+kind: app
+version: 0.4.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        sourceType: llm
+        targetType: answer
+      id: llm-answer
+      source: llm
+      sourceHandle: source
+      target: answer
+      targetHandle: target
+      type: custom
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: knowledge-retrieval
+      id: 1763409359462-source-1763914009084-target
+      source: '1763409359462'
+      sourceHandle: source
+      target: '1763914009084'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: knowledge-retrieval
+        targetType: llm
+      id: 1763914009084-source-llm-target
+      source: '1763914009084'
+      sourceHandle: source
+      target: llm
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: Start
+        type: start
+        variables: []
+      height: 52
+      id: '1763409359462'
+      position:
+        x: -160
+        y: 291
+      positionAbsolute:
+        x: -160
+        y: 291
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1763914009084'
+          - result
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: qwen3-4b
+          provider: langgenius/openai_api_compatible/openai_api_compatible
+        prompt_template:
+        - id: 63fab8c8-87a8-414f-99cb-ff2dcf26a92c
+          role: system
+          text: "You are a strict fault classifier for SCADA and IoT sensors.\n\n\
+            Each request contains:\n1) A JSON object called `inputs` with:\n   - device_name:\
+            \ string\n   - device_type: one of\n       \"dummy\", \"wind_speed\",\
+            \ \"wind_dir\", \"inside_temp\", \"outside_temp\"\n   - normal: baseline\
+            \ numeric value for dummy devices, or null for others\n   - value: the\
+            \ current reading (a number) or the string \"NA\"\n2) A natural language\
+            \ query that includes a list called\n   `recent_values_last_5s (oldest->newest)`\
+            \ showing the last ~5 seconds\n   of readings for that device.\n\nThe\
+            \ retrieved knowledge about this device is in the <knowledge> flag:\n\
+            <knowledge>\n{{#context#}}\n</knowledge>\n\nYour task is to output a final\
+            \ health decision for this sensor:\n- GOOD\n- ATTENTION\n- FAULT\n\nUse\
+            \ these general guidelines:\n\n1. Use the knowledge inside <knowledge>\
+            \ together with the current value,\n   the recent 5-second history, and\
+            \ the normal value (if provided) to\n   judge whether the behaviour is:\n\
+            \   - consistent with normal expectations (GOOD),\n   - somewhat abnormal\
+            \ or uncertain (ATTENTION),\n   - clearly abnormal, invalid, or failing\
+            \ (FAULT).\n\n2. Consider whether the values are:\n   - within plausible\
+            \ ranges for the given device_type,\n   - reasonably stable or slowly\
+            \ changing over time,\n   - or showing obviously abnormal patterns such\
+            \ as extreme spikes,\n     impossible values, or long runs of missing\
+            \ data.\n\n3. For dummy sensors, normal is the expected baseline. Large\
+            \ or frequent\n   deviations from normal over the recent history should\
+            \ push you\n   towards ATTENTION or FAULT, while values staying reasonably\
+            \ close to\n   normal are more likely GOOD.\n\n4. For physical sensors\
+            \ (wind_speed, wind_dir, inside_temp, outside_temp),\n   use the typical\
+            \ behaviour and ranges described in the knowledge:\n   - Values clearly\
+            \ outside realistic or documented ranges are likely FAULT.\n   - Unusual\
+            \ but still plausible values, or unstable behaviour, may justify\n   \
+            \  ATTENTION.\n   - Reasonable, stable values that match the knowledge\
+            \ are usually GOOD.\n\n5. For NA values in the recent 5-second history:\n\
+            \   - A small number of isolated NA readings can still be compatible with\
+            \ GOOD.\n   - Several NA readings in that short window suggest data quality\
+            \ or\n     communication issues and should lean towards ATTENTION.\n \
+            \  - A cluster of many NA readings in that window may indicate a more\
+            \ serious\n     problem and can justify FAULT.\n\n6. If information is\
+            \ missing, conflicting, or unclear, be conservative:\n   - Prefer ATTENTION\
+            \ over GOOD when in doubt.\n   - Reserve FAULT for clearly problematic\
+            \ or highly suspicious situations.\n\n7. Also pay special attention to\
+            \ strongly irregular patterns:\n- If the recent 5-second history shows\
+            \ very large jumps, rapid alternation\n  between extremely low and extremely\
+            \ high values, or physically impossible\n  values (such as negative wind\
+            \ speeds or temperatures that are far outside\n  what is described in\
+            \ the knowledge), you should strongly prefer FAULT.\n- If the behaviour\
+            \ is only mildly unusual or uncertain, you may use ATTENTION.\n- If values\
+            \ look consistent with the typical normal patterns in the knowledge\n\
+            \  and the recent history is stable, GOOD is appropriate.\n\nYour output\
+            \ MUST be exactly one word:\nGOOD\nATTENTION\nFAULT\n"
+        - id: c79f2b4d-3471-4811-8919-383478a1c50c
+          role: user
+          text: '{{#sys.query#}}'
+        selected: true
+        title: LLM
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: llm
+      position:
+        x: 398
+        y: 291
+      positionAbsolute:
+        x: 398
+        y: 291
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#llm.text#}}'
+        selected: false
+        title: Answer
+        type: answer
+        variables: []
+      height: 104
+      id: answer
+      position:
+        x: 706
+        y: 291
+      positionAbsolute:
+        x: 706
+        y: 291
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        dataset_ids:
+        - QqmBxtXSay0BYfqvrUqbhHZlGz4l2mg3GJ8Lw6v7gJHIXhlGbxlOLLv9tqoOXO9x
+        multiple_retrieval_config:
+          reranking_enable: false
+          reranking_mode: reranking_model
+          top_k: 4
+        query_variable_selector:
+        - sys
+        - query
+        retrieval_mode: multiple
+        selected: false
+        title: Knowledge Retrieval
+        type: knowledge-retrieval
+      height: 90
+      id: '1763914009084'
+      position:
+        x: 112
+        y: 291
+      positionAbsolute:
+        x: 112
+        y: 291
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: 173
+      y: 456.5
+      zoom: 1
+  rag_pipeline_variables: []

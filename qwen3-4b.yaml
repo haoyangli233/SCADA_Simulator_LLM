@@ -1,0 +1,57 @@
+services:
+  qwen3-4b:
+    image: vllm/vllm-openai:v0.11.0 
+    container_name: qwen3-4b
+    ports:
+      - "8001:8001"
+    # === GPU selection ===
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+
+      # === Offline / no outbound fetches ===
+      # Tell HF + Transformers to never phone home.
+      - HF_HUB_OFFLINE=1
+      - TRANSFORMERS_OFFLINE=1
+      - HF_DATASETS_OFFLINE=1
+      # === vLLM telemetry/logs (keep local; no usage stats uploads) ===
+      - VLLM_NO_USAGE_STATS=1
+      - DO_NOT_TRACK=1
+
+    # Use NVIDIA GPUs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ["gpu"]
+
+    # Cache mounts (avoid any remote pulls; keep everything on disk)
+    volumes:
+      # The path to your local model files, read-only inside the container
+      - /home/edward/Desktop/FMPS/models/qwen3-4b-ins:/models/qwen3-4b:ro
+      # HF cache (optional but speeds up local loads)
+      - ~/.cache/huggingface:/root/.cache/huggingface
+
+    ipc: host
+    restart: unless-stopped
+
+    command:
+      # vLLM OpenAI-compatible server
+      - "--model"
+      - "/models/qwen3-4b"
+      - "--served-model-name"
+      - "qwen3-4b"
+      - "--port"
+      - "8001"
+      - "--gpu-memory-utilization"
+      - "0.8"
+      - "--max-model-len"
+      - "2048"
+
+    networks:
+      - default
+
+# Make sure DIFY can see the vLLM container
+networks:
+  default:
+    name: docker_default
+    external: true
