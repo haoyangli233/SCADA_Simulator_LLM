@@ -11,11 +11,11 @@ This repository contains the final project code for **ECE-GY-9313: AI/ML for Net
 
 ## Table of Contents
 
-1.  [Prerequisites](https://www.google.com/search?q=%23prerequisites)
-2.  [Model Setup](https://www.google.com/search?q=%23model-setup)
-3.  [Hosting with VLLM](https://www.google.com/search?q=%23hosting-with-vllm)
-4.  [Dify Installation & Configuration](https://www.google.com/search?q=%23dify-installation--configuration)
-5.  [Running the Simulation](https://www.google.com/search?q=%23running-the-simulation)
+1.  [Prerequisites]
+2.  [Model Setup]
+3.  [Hosting with VLLM]
+4.  [Dify Installation & Configuration]
+5.  [Running the Simulation]
 
 -----
 
