@@ -43,7 +43,7 @@ services:
       - "--port"
       - "8001"
       - "--gpu-memory-utilization"
-      - "0.8"
+      - "0.5"
       - "--max-model-len"
       - "2048"
 
