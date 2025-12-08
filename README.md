@@ -117,7 +117,7 @@ Both workflows follow a similar structure, differing primarily in their prompts.
 ## Running the Simulation
 
 1.  Open `simulator.py` in your code editor.
-2.  Paste the two API keys generated in the previous step into the designated configuration variables.
+2.  Paste the two API keys generated in the previous step into the designated configuration variables. (Note: do this in the final SCADAApp Class, not in the previous Dify classes)
 3.  Run the simulator:
 
 <!-- end list -->
