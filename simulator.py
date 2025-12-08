@@ -793,16 +793,19 @@ class SCADAApp:
 
         self.sim = SCADASimulator()
         self.current_selected_index: Optional[int] = None
-
-        # Update the api keys below with your own Dify app keys and urls
+        
+        ########
+        ############################################################################################################################################################ Here!!!!!!!!!!
+        #######
+        
         self.dify = DifyClient(
             base_url="http://localhost/v1",
-            api_key="app-xxx",  # classifier
+            api_key="app-xxx",  # API Key for 'LLM for SCADA'
             enable=True,
         )
         self.comment_llm = DifyCommentClient(
             base_url="http://localhost/v1",
-            api_key="app-xxx",  # comment generator
+            api_key="app-xxx",  # API Key for 'Reasoning for SCADA'
             enable=True,
         )
 
